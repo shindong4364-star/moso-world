@@ -585,12 +585,6 @@
           <div class="empty">메시지를 불러오는 중...</div>
         </div>
         <form class="chat-compose" onsubmit="sendMessage(event)">
-          <select id="msgSender">
-            <option value="동원|대표|👑">👑 동원 님</option>
-            <option value="피클|메인 비서|🥒">🥒 피클</option>
-            <option value="피자|서브 비서|🍕">🍕 피자</option>
-            <option value="효주 님 비서|협력 비서|💐">💐 효주비서</option>
-          </select>
           <input id="msgInput" type="text" placeholder="회의실에 메시지 남기기..." autocomplete="off" />
           <button class="btn" type="submit">전송</button>
         </form>
@@ -746,13 +740,12 @@
       const input = document.getElementById("msgInput");
       const text = input.value.trim();
       if (!text) return;
-      const [sender_name, sender_role, sender_emoji] = document.getElementById("msgSender").value.split("|");
       input.value = "";
       await db.from("messages").insert([{
         room: currentRoom,
-        sender_name,
-        sender_role,
-        sender_emoji,
+        sender_name: "동원",
+        sender_role: "대표",
+        sender_emoji: "👑",
         body: text
       }]);
     }
