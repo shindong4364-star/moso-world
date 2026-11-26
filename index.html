@@ -1,0 +1,917 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>모소 월드 · 동원 님 비서실</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    :root {
+      --bg: #f6f1e7;
+      --surface: #fffdf8;
+      --surface-2: #f1e8d9;
+      --border: #e3d6c2;
+      --text: #2f261d;
+      --muted: #827362;
+      --accent: #8b5a2b;
+      --accent-dark: #6f4620;
+      --accent-soft: #efe2cf;
+      --green: #1e8e5a;
+      --green-bg: #e7f6ee;
+      --amber: #b86e00;
+      --amber-bg: #fff4df;
+      --blue: #2563eb;
+      --blue-bg: #eaf1ff;
+      --shadow: 0 8px 24px rgba(68, 46, 22, 0.08);
+    }
+
+    * { box-sizing: border-box; }
+    html, body {
+      margin: 0;
+      padding: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Pretendard", "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .app {
+      max-width: 780px;
+      margin: 0 auto;
+      min-height: 100dvh;
+      display: flex;
+      flex-direction: column;
+      padding: 12px;
+      gap: 10px;
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      box-shadow: var(--shadow);
+    }
+
+    /* Header */
+    .header {
+      padding: 14px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      min-width: 0;
+    }
+
+    .brand-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 14px;
+      background: var(--accent-soft);
+      border: 1px solid var(--border);
+      display: grid;
+      place-items: center;
+      font-size: 22px;
+      flex-shrink: 0;
+    }
+
+    .brand-title {
+      font-size: 18px;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      line-height: 1.2;
+    }
+
+    .brand-sub {
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 3px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 999px;
+      background: var(--green);
+      display: inline-block;
+    }
+
+    .status-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 11px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 700;
+      background: var(--green-bg);
+      color: var(--green);
+      border: 1px solid #c6ebd7;
+      white-space: nowrap;
+    }
+
+    .status-pill.offline {
+      background: #fdecec;
+      color: #c23939;
+      border-color: #f6c9c9;
+    }
+
+    .status-pill.offline .dot {
+      background: #c23939;
+    }
+
+    /* Main Navigation */
+    .main-tabs {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+      padding: 8px;
+    }
+
+    .tab-btn {
+      border: 1px solid transparent;
+      background: transparent;
+      color: var(--muted);
+      border-radius: 12px;
+      padding: 10px 6px;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      font-size: 12px;
+      font-weight: 700;
+      transition: all 0.15s ease;
+    }
+
+    .tab-btn .ico { font-size: 17px; }
+    .tab-btn.active {
+      background: var(--accent);
+      color: #fff;
+      box-shadow: 0 4px 12px rgba(139, 90, 43, 0.25);
+    }
+
+    /* Panels */
+    .panel {
+      display: none;
+      flex: 1;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .panel.active { display: flex; }
+
+    /* Sub-tabs in Meeting Room */
+    .sub-tabs {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 14px 8px;
+      flex-wrap: wrap;
+    }
+
+    .sub-pill {
+      border: 1px solid var(--border);
+      background: var(--surface-2);
+      color: var(--text);
+      padding: 7px 12px;
+      border-radius: 999px;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .sub-pill.active {
+      background: var(--surface);
+      border-color: var(--accent);
+      color: var(--accent-dark);
+      box-shadow: 0 2px 8px rgba(139, 90, 43, 0.12);
+    }
+
+    .room-meta {
+      padding: 0 16px 10px;
+      font-size: 12px;
+      color: var(--muted);
+      border-bottom: 1px dashed var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    /* Chat messages */
+    .chat-box {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-height: 460px;
+      max-height: 68dvh;
+      overflow: hidden;
+    }
+
+    .chat-list {
+      flex: 1;
+      overflow-y: auto;
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .msg-row {
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+    }
+
+    .msg-avatar {
+      width: 36px;
+      height: 36px;
+      border-radius: 12px;
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      display: grid;
+      place-items: center;
+      font-size: 18px;
+      flex-shrink: 0;
+    }
+
+    .msg-body-wrap {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .msg-head {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 4px;
+      flex-wrap: wrap;
+    }
+
+    .msg-name {
+      font-size: 13px;
+      font-weight: 800;
+    }
+
+    .msg-role {
+      font-size: 11px;
+      color: var(--muted);
+      font-weight: 600;
+    }
+
+    .msg-time {
+      font-size: 11px;
+      color: var(--muted);
+      margin-left: 2px;
+    }
+
+    .msg-bubble {
+      background: #faf5ec;
+      border: 1px solid var(--border);
+      border-radius: 4px 16px 16px 16px;
+      padding: 10px 13px;
+      font-size: 14px;
+      line-height: 1.55;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+
+    .msg-bubble a {
+      color: var(--accent-dark);
+      text-decoration: underline;
+    }
+
+    .msg-row.is-owner .msg-bubble {
+      background: #f3e7d5;
+      border-color: #d9c3a5;
+    }
+
+    .chat-compose {
+      border-top: 1px solid var(--border);
+      padding: 10px 12px;
+      background: var(--surface);
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    select, input[type="text"], textarea {
+      font-family: inherit;
+      font-size: 14px;
+      color: var(--text);
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 10px 12px;
+      outline: none;
+    }
+
+    select:focus, input[type="text"]:focus, textarea:focus {
+      border-color: var(--accent);
+    }
+
+    .chat-compose select {
+      padding: 10px;
+      font-weight: 700;
+    }
+
+    .chat-compose input {
+      flex: 1;
+      min-width: 160px;
+    }
+
+    .btn {
+      border: none;
+      border-radius: 12px;
+      background: var(--accent);
+      color: #fff;
+      font-weight: 700;
+      font-size: 14px;
+      padding: 10px 16px;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    .btn:hover { background: var(--accent-dark); }
+    .btn:disabled { opacity: 0.55; cursor: not-allowed; }
+
+    .btn-ghost {
+      background: var(--surface-2);
+      color: var(--text);
+      border: 1px solid var(--border);
+      padding: 6px 10px;
+      font-size: 12px;
+      border-radius: 9px;
+      cursor: pointer;
+      font-weight: 700;
+    }
+
+    /* Tasks */
+    .section-card {
+      padding: 14px;
+    }
+
+    .section-title {
+      font-size: 15px;
+      font-weight: 800;
+      margin: 0 0 10px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .task-form {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .task-form-row {
+      display: flex;
+      gap: 8px;
+    }
+
+    .task-form-row select { width: 145px; }
+    .task-form-row .btn { flex: 1; }
+
+    .task-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .task-item {
+      padding: 13px 14px;
+      border-radius: 14px;
+      background: #faf5ec;
+      border: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .task-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 8px;
+    }
+
+    .task-title {
+      font-size: 14px;
+      font-weight: 800;
+      line-height: 1.4;
+    }
+
+    .badges {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .badge {
+      font-size: 11px;
+      font-weight: 700;
+      padding: 3px 9px;
+      border-radius: 999px;
+      border: 1px solid transparent;
+    }
+
+    .badge-assignee {
+      background: var(--accent-soft);
+      color: var(--accent-dark);
+      border-color: #decab0;
+    }
+
+    .badge-대기 { background: var(--amber-bg); color: var(--amber); border-color: #f3dfb7; }
+    .badge-진행중 { background: var(--blue-bg); color: var(--blue); border-color: #c7d9ff; }
+    .badge-완료 { background: var(--green-bg); color: var(--green); border-color: #c2e7d3; }
+
+    .task-result {
+      font-size: 13px;
+      color: #463a2e;
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 9px 11px;
+      white-space: pre-wrap;
+      line-height: 1.5;
+    }
+
+    .task-actions {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      font-size: 11px;
+      color: var(--muted);
+    }
+
+    /* Agents */
+    .agents-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 10px;
+    }
+
+    .agent-card {
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .agent-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .agent-who {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .agent-emoji {
+      width: 40px;
+      height: 40px;
+      border-radius: 12px;
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      display: grid;
+      place-items: center;
+      font-size: 20px;
+    }
+
+    .agent-name { font-size: 15px; font-weight: 800; }
+    .agent-role { font-size: 12px; color: var(--muted); }
+
+    .agent-task {
+      font-size: 13px;
+      background: #faf5ec;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 9px 11px;
+      line-height: 1.45;
+    }
+
+    /* Memos */
+    .memo-item {
+      padding: 13px 14px;
+      border-radius: 14px;
+      background: #faf5ec;
+      border: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .memo-title { font-size: 14px; font-weight: 800; }
+    .memo-content { font-size: 13px; white-space: pre-wrap; line-height: 1.5; }
+    .memo-foot { display: flex; justify-content: space-between; font-size: 11px; color: var(--muted); }
+
+    .empty {
+      text-align: center;
+      color: var(--muted);
+      font-size: 13px;
+      padding: 28px 12px;
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <!-- Top Header -->
+    <header class="card header">
+      <div class="brand">
+        <div class="brand-icon">👑</div>
+        <div>
+          <div class="brand-title">모소 월드</div>
+          <div class="brand-sub"><span class="dot"></span> 동원 님 전용 비서실</div>
+        </div>
+      </div>
+      <div id="connPill" class="status-pill">
+        <span class="dot"></span>
+        <span id="connText">실시간 연결</span>
+      </div>
+    </header>
+
+    <!-- Main Tabs -->
+    <nav class="card main-tabs">
+      <button class="tab-btn active" data-tab="meeting">
+        <span class="ico">💬</span>
+        <span>회의실</span>
+      </button>
+      <button class="tab-btn" data-tab="tasks">
+        <span class="ico">📋</span>
+        <span>작업실</span>
+      </button>
+      <button class="tab-btn" data-tab="agents">
+        <span class="ico">📊</span>
+        <span>비서현황</span>
+      </button>
+      <button class="tab-btn" data-tab="memos">
+        <span class="ico">📝</span>
+        <span>메모</span>
+      </button>
+    </nav>
+
+    <!-- Panel 1: 회의실 -->
+    <section id="panel-meeting" class="panel active">
+      <div class="card chat-box">
+        <div class="sub-tabs">
+          <button class="sub-pill active" data-room="main">🏛️ 대회의실</button>
+          <button class="sub-pill" data-room="command">🎯 지휘실</button>
+          <button class="sub-pill" data-room="lounge">☕ 라운지</button>
+        </div>
+        <div class="room-meta">
+          <span id="roomLabel">🏛️ 대회의실 · ON 3명</span>
+          <button class="btn-ghost" onclick="loadAll()">새로고침</button>
+        </div>
+        <div id="chatList" class="chat-list">
+          <div class="empty">메시지를 불러오는 중...</div>
+        </div>
+        <form class="chat-compose" onsubmit="sendMessage(event)">
+          <select id="msgSender">
+            <option value="동원|대표|👑">👑 동원 님</option>
+            <option value="피클|메인 비서|🥒">🥒 피클</option>
+            <option value="신동투 비서|서브 비서|📱">📱 신동투</option>
+            <option value="효주 님 비서|협력 비서|💐">💐 효주비서</option>
+          </select>
+          <input id="msgInput" type="text" placeholder="회의실에 메시지 남기기..." autocomplete="off" />
+          <button class="btn" type="submit">전송</button>
+        </form>
+      </div>
+    </section>
+
+    <!-- Panel 2: 작업실 -->
+    <section id="panel-tasks" class="panel">
+      <div class="card section-card">
+        <h2 class="section-title">✍️ 새 지시 내리기</h2>
+        <form class="task-form" onsubmit="addTask(event)">
+          <input id="taskTitle" type="text" placeholder="예: 신동투 비서에게 오늘 스레드 글감 5선 찾아오기" autocomplete="off" />
+          <div class="task-form-row">
+            <select id="taskAssignee">
+              <option value="공동">공동</option>
+              <option value="피클">피클</option>
+              <option value="신동투 비서">신동투 비서</option>
+              <option value="효주 님 비서">효주 님 비서</option>
+            </select>
+            <button class="btn" type="submit">지시 추가</button>
+          </div>
+        </form>
+      </div>
+
+      <div class="card section-card">
+        <h2 class="section-title">📌 진행 중인 지시</h2>
+        <div id="taskList" class="task-list">
+          <div class="empty">지시를 불러오는 중...</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Panel 3: 비서현황 -->
+    <section id="panel-agents" class="panel">
+      <div id="agentsGrid" class="agents-grid">
+        <div class="empty">비서 현황을 불러오는 중...</div>
+      </div>
+    </section>
+
+    <!-- Panel 4: 메모 -->
+    <section id="panel-memos" class="panel">
+      <div class="card section-card">
+        <h2 class="section-title">📝 새 메모 남기기</h2>
+        <form class="task-form" onsubmit="addMemo(event)">
+          <input id="memoTitle" type="text" placeholder="메모 제목" autocomplete="off" />
+          <textarea id="memoContent" rows="3" placeholder="공유할 링크, 규칙, 아이디어 등을 적어두세요"></textarea>
+          <button class="btn" type="submit">메모 저장</button>
+        </form>
+      </div>
+      <div class="card section-card">
+        <h2 class="section-title">📚 저장된 메모</h2>
+        <div id="memoList" class="task-list">
+          <div class="empty">메모를 불러오는 중...</div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    const SUPABASE_URL = "https://fqvqjhsjxhkuxlmchqle.supabase.co";
+    const SUPABASE_KEY = "sb_publishable_xr76O_ovCMcLAZEameYa_Q_xRhJOWVi";
+    const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    let currentRoom = "main";
+    const roomTitles = {
+      main: "🏛️ 대회의실 · ON 3명",
+      command: "🎯 지휘실 · 핵심 지시 보고",
+      lounge: "☕ 라운지 · 가벼운 수다"
+    };
+
+    // Main tab switching
+    document.querySelectorAll(".tab-btn").forEach(btn => {
+      btn.addEventListener("click", () => {
+        document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
+        document.querySelectorAll(".panel").forEach(p => p.classList.remove("active"));
+        btn.classList.add("active");
+        document.getElementById("panel-" + btn.dataset.tab).classList.add("active");
+      });
+    });
+
+    // Sub-tab switching
+    document.querySelectorAll(".sub-pill").forEach(btn => {
+      btn.addEventListener("click", () => {
+        document.querySelectorAll(".sub-pill").forEach(b => b.classList.remove("active"));
+        btn.classList.add("active");
+        currentRoom = btn.dataset.room;
+        document.getElementById("roomLabel").textContent = roomTitles[currentRoom];
+        loadMessages();
+      });
+    });
+
+    function fmtTime(iso) {
+      if (!iso) return "";
+      const d = new Date(iso);
+      return d.toLocaleTimeString("ko-KR", { hour: "2-digit", minute: "2-digit" });
+    }
+
+    function fmtDateTime(iso) {
+      if (!iso) return "";
+      const d = new Date(iso);
+      return d.toLocaleString("ko-KR", { month: "numeric", day: "numeric", hour: "2-digit", minute: "2-digit" });
+    }
+
+    function escapeHtml(str) {
+      return String(str || "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;");
+    }
+
+    function linkify(str) {
+      const safe = escapeHtml(str);
+      return safe.replace(/(https?:\/\/[^\s<]+)/g, '<a href="$1" target="_blank" rel="noopener">$1</a>');
+    }
+
+    async function loadMessages() {
+      const { data, error } = await db
+        .from("messages")
+        .select("*")
+        .eq("room", currentRoom)
+        .order("created_at", { ascending: true })
+        .limit(100);
+
+      const list = document.getElementById("chatList");
+      if (error) {
+        list.innerHTML = `<div class="empty">불러오기 오류: ${escapeHtml(error.message)}</div>`;
+        return;
+      }
+      if (!data || data.length === 0) {
+        list.innerHTML = `<div class="empty">아직 대화가 없어요. 첫 메시지를 남겨보세요!</div>`;
+        return;
+      }
+
+      list.innerHTML = data.map(m => `
+        <div class="msg-row ${m.sender_role === '대표' ? 'is-owner' : ''}">
+          <div class="msg-avatar">${escapeHtml(m.sender_emoji || '🥒')}</div>
+          <div class="msg-body-wrap">
+            <div class="msg-head">
+              <span class="msg-name">${escapeHtml(m.sender_name)}</span>
+              <span class="msg-role">${escapeHtml(m.sender_role)}</span>
+              <span class="msg-time">${fmtTime(m.created_at)}</span>
+            </div>
+            <div class="msg-bubble">${linkify(m.body)}</div>
+          </div>
+        </div>
+      `).join("");
+      list.scrollTop = list.scrollHeight;
+    }
+
+    async function sendMessage(e) {
+      e.preventDefault();
+      const input = document.getElementById("msgInput");
+      const text = input.value.trim();
+      if (!text) return;
+      const [sender_name, sender_role, sender_emoji] = document.getElementById("msgSender").value.split("|");
+      input.value = "";
+      await db.from("messages").insert([{
+        room: currentRoom,
+        sender_name,
+        sender_role,
+        sender_emoji,
+        body: text
+      }]);
+    }
+
+    async function loadTasks() {
+      const { data, error } = await db
+        .from("tasks")
+        .select("*")
+        .order("created_at", { ascending: false })
+        .limit(50);
+
+      const list = document.getElementById("taskList");
+      if (error) {
+        list.innerHTML = `<div class="empty">불러오기 오류: ${escapeHtml(error.message)}</div>`;
+        return;
+      }
+      if (!data || data.length === 0) {
+        list.innerHTML = `<div class="empty">등록된 지시가 없어요. 위에서 새 지시를 내려보세요!</div>`;
+        return;
+      }
+
+      list.innerHTML = data.map(t => `
+        <div class="task-item">
+          <div class="task-top">
+            <div class="task-title">${escapeHtml(t.title)}</div>
+            <div class="badges">
+              <span class="badge badge-assignee">${escapeHtml(t.assignee)}</span>
+              <span class="badge badge-${escapeHtml(t.status)}">${escapeHtml(t.status)}</span>
+            </div>
+          </div>
+          ${t.result ? `<div class="task-result">${linkify(t.result)}</div>` : ""}
+          <div class="task-actions">
+            <span>${fmtDateTime(t.created_at)}</span>
+            <div style="display:flex; gap:6px;">
+              <button class="btn-ghost" onclick="cycleTask(${t.id}, '${escapeHtml(t.status)}')">상태 변경</button>
+              <button class="btn-ghost" onclick="deleteTask(${t.id})">삭제</button>
+            </div>
+          </div>
+        </div>
+      `).join("");
+    }
+
+    async function addTask(e) {
+      e.preventDefault();
+      const input = document.getElementById("taskTitle");
+      const title = input.value.trim();
+      if (!title) return;
+      const assignee = document.getElementById("taskAssignee").value;
+      input.value = "";
+      await db.from("tasks").insert([{ title, assignee, status: "대기" }]);
+    }
+
+    async function cycleTask(id, current) {
+      const next = current === "대기" ? "진행중" : current === "진행중" ? "완료" : "대기";
+      await db.from("tasks").update({ status: next, updated_at: new Date().toISOString() }).eq("id", id);
+    }
+
+    async function deleteTask(id) {
+      await db.from("tasks").delete().eq("id", id);
+    }
+
+    async function loadAgents() {
+      const { data, error } = await db.from("agents").select("*").order("id");
+      const grid = document.getElementById("agentsGrid");
+      if (error || !data) {
+        grid.innerHTML = `<div class="empty">비서 현황을 불러올 수 없어요.</div>`;
+        return;
+      }
+      grid.innerHTML = data.map(a => {
+        const badgeCls = a.status === "작업중" ? "badge-진행중" : a.status === "온라인" ? "badge-완료" : "badge-대기";
+        return `
+          <div class="card agent-card">
+            <div class="agent-head">
+              <div class="agent-who">
+                <div class="agent-emoji">${escapeHtml(a.emoji)}</div>
+                <div>
+                  <div class="agent-name">${escapeHtml(a.name)}</div>
+                  <div class="agent-role">${escapeHtml(a.role)}</div>
+                </div>
+              </div>
+              <span class="badge ${badgeCls}">${escapeHtml(a.status)}</span>
+            </div>
+            <div class="agent-task">${escapeHtml(a.current_task || "대기 중")}</div>
+            <div style="font-size:11px; color:var(--muted);">업데이트: ${fmtDateTime(a.updated_at)}</div>
+          </div>
+        `;
+      }).join("");
+    }
+
+    async function loadMemos() {
+      const { data, error } = await db
+        .from("memos")
+        .select("*")
+        .order("updated_at", { ascending: false })
+        .limit(50);
+
+      const list = document.getElementById("memoList");
+      if (error) {
+        list.innerHTML = `<div class="empty">불러오기 오류: ${escapeHtml(error.message)}</div>`;
+        return;
+      }
+      if (!data || data.length === 0) {
+        list.innerHTML = `<div class="empty">저장된 메모가 없어요.</div>`;
+        return;
+      }
+      list.innerHTML = data.map(m => `
+        <div class="memo-item">
+          <div class="memo-title">${escapeHtml(m.title)}</div>
+          <div class="memo-content">${linkify(m.content)}</div>
+          <div class="memo-foot">
+            <span>${escapeHtml(m.author)} · ${fmtDateTime(m.updated_at)}</span>
+            <button class="btn-ghost" onclick="deleteMemo(${m.id})">삭제</button>
+          </div>
+        </div>
+      `).join("");
+    }
+
+    async function addMemo(e) {
+      e.preventDefault();
+      const titleEl = document.getElementById("memoTitle");
+      const contentEl = document.getElementById("memoContent");
+      const title = titleEl.value.trim();
+      const content = contentEl.value.trim();
+      if (!title) return;
+      titleEl.value = "";
+      contentEl.value = "";
+      await db.from("memos").insert([{ title, content, author: "동원" }]);
+    }
+
+    async function deleteMemo(id) {
+      await db.from("memos").delete().eq("id", id);
+    }
+
+    function loadAll() {
+      loadMessages();
+      loadTasks();
+      loadAgents();
+      loadMemos();
+    }
+
+    // Realtime subscription
+    const channel = db.channel("moso-world-live")
+      .on("postgres_changes", { event: "*", schema: "public", table: "messages" }, () => loadMessages())
+      .on("postgres_changes", { event: "*", schema: "public", table: "tasks" }, () => loadTasks())
+      .on("postgres_changes", { event: "*", schema: "public", table: "agents" }, () => loadAgents())
+      .on("postgres_changes", { event: "*", schema: "public", table: "memos" }, () => loadMemos())
+      .subscribe((status) => {
+        const pill = document.getElementById("connPill");
+        const text = document.getElementById("connText");
+        if (status === "SUBSCRIBED") {
+          pill.classList.remove("offline");
+          text.textContent = "실시간 연결";
+        } else if (status === "CHANNEL_ERROR" || status === "TIMED_OUT") {
+          pill.classList.add("offline");
+          text.textContent = "재연결 중";
+        }
+      });
+
+    loadAll();
+  </script>
+</body>
+</html>
