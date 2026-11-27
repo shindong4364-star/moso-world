@@ -325,6 +325,8 @@
       border-radius: 9px;
       cursor: pointer;
       font-weight: 700;
+      white-space: nowrap;
+      flex-shrink: 0;
     }
 
     /* Tasks */
@@ -1366,11 +1368,11 @@
           continue;
         }
 
-        if (/^\s*>\s?/.test(line)) {
+        if (/^\s*(?:>|&gt;)\s?/.test(line)) {
           flush();
           const buf = [];
-          while (i < lines.length && /^\s*>\s?/.test(lines[i])) {
-            buf.push(lines[i].replace(/^\s*>\s?/, ""));
+          while (i < lines.length && /^\s*(?:>|&gt;)\s?/.test(lines[i])) {
+            buf.push(lines[i].replace(/^\s*(?:>|&gt;)\s?/, ""));
             i++;
           }
           out.push(`<blockquote>${buf.map(inlineMd).join("<br>")}</blockquote>`);
