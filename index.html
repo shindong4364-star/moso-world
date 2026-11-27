@@ -168,38 +168,8 @@
     }
     .panel.active { display: flex; }
 
-    /* Sub-tabs in Meeting Room */
-    .sub-tabs {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      padding: 12px 14px 8px;
-      flex-wrap: wrap;
-    }
-
-    .sub-pill {
-      border: 1px solid var(--border);
-      background: var(--surface-2);
-      color: var(--text);
-      padding: 7px 12px;
-      border-radius: 999px;
-      font-size: 13px;
-      font-weight: 700;
-      cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      gap: 5px;
-    }
-
-    .sub-pill.active {
-      background: var(--surface);
-      border-color: var(--accent);
-      color: var(--accent-dark);
-      box-shadow: 0 2px 8px rgba(139, 90, 43, 0.12);
-    }
-
     .room-meta {
-      padding: 0 16px 10px;
+      padding: 12px 16px 10px;
       font-size: 12px;
       color: var(--muted);
       border-bottom: 1px dashed var(--border);
@@ -306,7 +276,7 @@
       flex-wrap: wrap;
     }
 
-    select, input[type="text"], textarea {
+    select, input[type="text"], input[type="search"], textarea {
       font-family: inherit;
       font-size: 14px;
       color: var(--text);
@@ -317,7 +287,7 @@
       outline: none;
     }
 
-    select:focus, input[type="text"]:focus, textarea:focus {
+    select:focus, input[type="text"]:focus, input[type="search"]:focus, textarea:focus {
       border-color: var(--accent);
     }
 
@@ -509,20 +479,253 @@
       line-height: 1.45;
     }
 
-    /* Memos */
-    .memo-item {
-      padding: 13px 14px;
+    /* Documents (저장소) */
+    .docs-toolbar {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .docs-toolbar input[type="search"] { flex: 1; min-width: 150px; }
+
+    .section-cap {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--muted);
+    }
+
+    .chip-row {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      margin-top: 10px;
+    }
+
+    .chip {
+      border: 1px solid var(--border);
+      background: var(--surface-2);
+      color: var(--text);
+      border-radius: 999px;
+      padding: 5px 11px;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      font-family: inherit;
+    }
+
+    .chip.active {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #fff;
+    }
+
+    .doc-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .doc-card {
+      width: 100%;
+      text-align: left;
+      padding: 14px 15px;
       border-radius: 14px;
       background: #faf5ec;
       border: 1px solid var(--border);
       display: flex;
       flex-direction: column;
-      gap: 6px;
+      gap: 7px;
+      cursor: pointer;
+      font-family: inherit;
+      color: inherit;
+      transition: border-color 0.15s ease, box-shadow 0.15s ease;
     }
 
-    .memo-title { font-size: 14px; font-weight: 800; }
-    .memo-content { font-size: 13px; white-space: pre-wrap; line-height: 1.5; }
-    .memo-foot { display: flex; justify-content: space-between; font-size: 11px; color: var(--muted); }
+    .doc-card:hover {
+      border-color: var(--accent);
+      box-shadow: 0 4px 14px rgba(139, 90, 43, 0.12);
+    }
+
+    .doc-card-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 10px;
+    }
+
+    .doc-title {
+      font-size: 15px;
+      font-weight: 800;
+      line-height: 1.4;
+      word-break: break-word;
+    }
+
+    .doc-chip {
+      font-size: 11px;
+      font-weight: 800;
+      padding: 3px 9px;
+      border-radius: 999px;
+      background: var(--accent-soft);
+      color: var(--accent-dark);
+      border: 1px solid #decab0;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    .doc-preview {
+      font-size: 12.5px;
+      color: #5a4a39;
+      line-height: 1.55;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .doc-foot {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      font-size: 11px;
+      color: var(--muted);
+      flex-wrap: wrap;
+    }
+
+    /* Document viewer / editor modal */
+    .modal {
+      position: fixed;
+      inset: 0;
+      background: rgba(47, 38, 29, 0.45);
+      display: none;
+      z-index: 60;
+      padding: 12px;
+      overflow-y: auto;
+    }
+
+    .modal.open { display: block; }
+
+    .modal-card {
+      max-width: 760px;
+      margin: 20px auto;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      box-shadow: 0 20px 50px rgba(47, 38, 29, 0.3);
+      display: flex;
+      flex-direction: column;
+      max-height: calc(100dvh - 40px);
+      overflow: hidden;
+    }
+
+    .modal-head {
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 10px;
+    }
+
+    .modal-title {
+      font-size: 17px;
+      font-weight: 800;
+      line-height: 1.35;
+      word-break: break-word;
+    }
+
+    .modal-meta {
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 4px;
+    }
+
+    .modal-body {
+      padding: 16px;
+      overflow-y: auto;
+      flex: 1;
+    }
+
+    .modal-foot {
+      padding: 12px 16px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .icon-btn {
+      border: 1px solid var(--border);
+      background: var(--surface-2);
+      border-radius: 10px;
+      width: 34px;
+      height: 34px;
+      flex-shrink: 0;
+      cursor: pointer;
+      font-size: 15px;
+      color: var(--text);
+    }
+
+    .danger { color: #c23939 !important; }
+
+    /* Rendered markdown */
+    .md {
+      font-size: 14px;
+      line-height: 1.72;
+      word-break: break-word;
+    }
+
+    .md > :first-child { margin-top: 0; }
+    .md h1, .md h2, .md h3 { line-height: 1.35; margin: 1.1em 0 0.45em; }
+    .md h1 { font-size: 20px; }
+    .md h2 { font-size: 17px; }
+    .md h3 { font-size: 15px; }
+    .md p { margin: 0.55em 0; }
+    .md ul, .md ol { margin: 0.55em 0; padding-left: 1.35em; }
+    .md li { margin: 0.22em 0; }
+    .md code {
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      padding: 1px 5px;
+      border-radius: 5px;
+      font-size: 0.9em;
+    }
+    .md pre {
+      background: #2f261d;
+      color: #f6f1e7;
+      padding: 12px;
+      border-radius: 10px;
+      overflow-x: auto;
+    }
+    .md pre code { background: none; border: none; color: inherit; padding: 0; }
+    .md blockquote {
+      margin: 0.6em 0;
+      padding: 0.1em 0 0.1em 12px;
+      border-left: 3px solid var(--border);
+      color: var(--muted);
+    }
+    .md hr { border: none; border-top: 1px dashed var(--border); margin: 1.1em 0; }
+    .md a { color: var(--accent-dark); text-decoration: underline; }
+    .md strong { font-weight: 800; }
+
+    .editor-form {
+      padding: 14px 16px 16px;
+      display: none;
+      flex-direction: column;
+      gap: 8px;
+      overflow-y: auto;
+    }
+
+    .editor-form.open { display: flex; }
+
+    .editor-form textarea {
+      min-height: 240px;
+      resize: vertical;
+      line-height: 1.6;
+      font-size: 13.5px;
+    }
 
     .empty {
       text-align: center;
@@ -563,22 +766,17 @@
         <span class="ico">📊</span>
         <span>비서현황</span>
       </button>
-      <button class="tab-btn" data-tab="memos">
-        <span class="ico">📝</span>
-        <span>메모</span>
+      <button class="tab-btn" data-tab="docs">
+        <span class="ico">📁</span>
+        <span>저장소</span>
       </button>
     </nav>
 
-    <!-- Panel 1: 회의실 -->
+    <!-- Panel 1: 회의실 (통합) -->
     <section id="panel-meeting" class="panel active">
       <div class="card chat-box">
-        <div class="sub-tabs">
-          <button class="sub-pill active" data-room="main">🏛️ 대회의실</button>
-          <button class="sub-pill" data-room="command">🎯 지휘실</button>
-          <button class="sub-pill" data-room="lounge">☕ 라운지</button>
-        </div>
         <div class="room-meta">
-          <span id="roomLabel">🏛️ 대회의실 · ON 3명</span>
+          <span id="roomLabel">💬 회의실 · ON 3명</span>
           <button class="btn-ghost" onclick="loadAll()">새로고침</button>
         </div>
         <div id="chatList" class="chat-list">
@@ -624,36 +822,65 @@
       </div>
     </section>
 
-    <!-- Panel 4: 메모 -->
-    <section id="panel-memos" class="panel">
+    <!-- Panel 4: 저장소 -->
+    <section id="panel-docs" class="panel">
       <div class="card section-card">
-        <h2 class="section-title">📝 새 메모 남기기</h2>
-        <form class="task-form" onsubmit="addMemo(event)">
-          <input id="memoTitle" type="text" placeholder="메모 제목" autocomplete="off" />
-          <textarea id="memoContent" rows="3" placeholder="공유할 링크, 규칙, 아이디어 등을 적어두세요"></textarea>
-          <button class="btn" type="submit">메모 저장</button>
-        </form>
+        <h2 class="section-title">📁 저장소 <span class="section-cap">지침서 · 리스팅 문서 보관함</span></h2>
+        <div class="docs-toolbar">
+          <input id="docSearch" type="search" placeholder="제목 · 본문 검색" autocomplete="off" oninput="renderDocs()" />
+          <button class="btn-ghost" id="docSortBtn" onclick="toggleDocSort()">제목순 ▾</button>
+          <button class="btn" type="button" onclick="openDocEditor()">＋ 새 문서</button>
+        </div>
+        <div id="docChips" class="chip-row"></div>
       </div>
+
       <div class="card section-card">
-        <h2 class="section-title">📚 저장된 메모</h2>
-        <div id="memoList" class="task-list">
-          <div class="empty">메모를 불러오는 중...</div>
+        <div id="docList" class="doc-list">
+          <div class="empty">문서를 불러오는 중...</div>
         </div>
       </div>
     </section>
+  </div>
+
+  <!-- Document viewer / editor -->
+  <div id="docModal" class="modal" onclick="if (event.target === this) closeDocModal()">
+    <div class="modal-card">
+      <div class="modal-head">
+        <div style="min-width: 0;">
+          <div id="viewerTitle" class="modal-title"></div>
+          <div id="viewerMeta" class="modal-meta"></div>
+        </div>
+        <button class="icon-btn" type="button" onclick="closeDocModal()" aria-label="닫기">✕</button>
+      </div>
+
+      <div id="viewerBody" class="modal-body">
+        <div id="viewerMd" class="md"></div>
+      </div>
+
+      <form id="editorForm" class="editor-form" onsubmit="saveDoc(event)">
+        <input id="editDocTitle" type="text" placeholder="문서 제목  예) 📘 [Side Hustle] 00. 마스터 지침" autocomplete="off" />
+        <input id="editDocAuthor" type="text" placeholder="작성자 · 카테고리  예) 피클 · Side Hustle" autocomplete="off" />
+        <textarea id="editDocContent" placeholder="마크다운으로 작성하세요.  # 제목, ## 소제목, - 목록, **강조**, `코드` 지원"></textarea>
+      </form>
+
+      <div id="viewerFoot" class="modal-foot">
+        <button class="btn-ghost" type="button" id="copyBtn" onclick="copyDocBody()">📋 본문 복사</button>
+        <button class="btn-ghost" type="button" onclick="editCurrentDoc()">✏️ 수정</button>
+        <button class="btn-ghost danger" type="button" onclick="deleteCurrentDoc()">🗑 삭제</button>
+        <button class="btn" type="button" onclick="closeDocModal()">닫기</button>
+      </div>
+
+      <div id="editorFoot" class="modal-foot" style="display: none;">
+        <button class="btn-ghost" type="button" onclick="cancelEdit()">취소</button>
+        <button class="btn" type="submit" form="editorForm">저장</button>
+      </div>
+    </div>
   </div>
 
   <script>
     const SUPABASE_URL = "https://fqvqjhsjxhkuxlmchqle.supabase.co";
     const SUPABASE_KEY = "sb_publishable_xr76O_ovCMcLAZEameYa_Q_xRhJOWVi";
     const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-
-    let currentRoom = "main";
-    const roomTitles = {
-      main: "🏛️ 대회의실 · ON 3명",
-      command: "🎯 지휘실 · 핵심 지시 보고",
-      lounge: "☕ 라운지 · 가벼운 수다"
-    };
 
     // Main tab switching
     document.querySelectorAll(".tab-btn").forEach(btn => {
@@ -665,16 +892,7 @@
       });
     });
 
-    // Sub-tab switching
-    document.querySelectorAll(".sub-pill").forEach(btn => {
-      btn.addEventListener("click", () => {
-        document.querySelectorAll(".sub-pill").forEach(b => b.classList.remove("active"));
-        btn.classList.add("active");
-        currentRoom = btn.dataset.room;
-        document.getElementById("roomLabel").textContent = roomTitles[currentRoom];
-        loadMessages();
-      });
-    });
+    // (회의실은 단일 방으로 통합. 예전 room 값도 모두 함께 읽어온다.)
 
     function fmtTime(iso) {
       if (!iso) return "";
@@ -702,12 +920,12 @@
     }
 
     async function loadMessages() {
+      // 통합 회의실: room 값(main / command / lounge / 그 외)과 상관없이 모두 불러온다.
       const { data, error } = await db
         .from("messages")
         .select("*")
-        .eq("room", currentRoom)
-        .order("created_at", { ascending: true })
-        .limit(100);
+        .order("created_at", { ascending: false })
+        .limit(200);
 
       const list = document.getElementById("chatList");
       if (error) {
@@ -719,7 +937,8 @@
         return;
       }
 
-      list.innerHTML = data.map(m => `
+      const rows = data.slice().reverse();
+      list.innerHTML = rows.map(m => `
         <div class="msg-row ${m.sender_role === '대표' ? 'is-owner' : ''}">
           <div class="msg-avatar">${escapeHtml(m.sender_emoji || '🥒')}</div>
           <div class="msg-body-wrap">
@@ -742,7 +961,7 @@
       if (!text) return;
       input.value = "";
       await db.from("messages").insert([{
-        room: currentRoom,
+        room: "main",
         sender_name: "동원",
         sender_role: "대표",
         sender_emoji: "👑",
@@ -835,55 +1054,343 @@
       }).join("");
     }
 
-    async function loadMemos() {
+    /* ---------- 📁 저장소 (문서 보관함) ---------- */
+    let docData = [];
+    let docSort = "title";        // title | recent
+    let activeCategory = "전체";
+    let currentDocId = null;
+    let editingDocId = null;
+
+    function docCategory(d) {
+      const m = String(d.title || "").match(/\[([^\]]+)\]/);
+      return m ? m[1].trim() : "일반";
+    }
+
+    function docSortKey(t) {
+      // 앞의 이모지·공백을 뺀 뒤 비교해야 00 → 01 → 02 → 03 순서가 지켜진다.
+      return String(t || "").replace(/^[^\p{L}\p{N}\[]+/u, "");
+    }
+
+    function stripMd(src) {
+      return String(src || "")
+        .replace(/```[\s\S]*?```/g, " ")
+        .replace(/!\[[^\]]*\]\([^)]*\)/g, " ")
+        .replace(/\[([^\]]*)\]\([^)]*\)/g, "$1")
+        .replace(/[#>*_`~|]+/g, " ")
+        .replace(/\s+/g, " ")
+        .trim();
+    }
+
+    async function loadDocs() {
       const { data, error } = await db
         .from("memos")
         .select("*")
         .order("updated_at", { ascending: false })
-        .limit(50);
+        .limit(200);
 
-      const list = document.getElementById("memoList");
+      const list = document.getElementById("docList");
       if (error) {
-        list.innerHTML = `<div class="empty">불러오기 오류: ${escapeHtml(error.message)}</div>`;
+        list.innerHTML = `<div class="empty">문서 불러오기 오류: ${escapeHtml(error.message)}</div>`;
         return;
       }
-      if (!data || data.length === 0) {
-        list.innerHTML = `<div class="empty">저장된 메모가 없어요.</div>`;
+      docData = data || [];
+      renderDocs();
+    }
+
+    function toggleDocSort() {
+      docSort = docSort === "title" ? "recent" : "title";
+      document.getElementById("docSortBtn").textContent = docSort === "title" ? "제목순 ▾" : "최신순 ▾";
+      renderDocs();
+    }
+
+    function renderDocs() {
+      const chipsEl = document.getElementById("docChips");
+      const listEl = document.getElementById("docList");
+
+      const cats = ["전체", ...Array.from(new Set(docData.map(docCategory)))];
+      if (!cats.includes(activeCategory)) activeCategory = "전체";
+      chipsEl.innerHTML = docData.length
+        ? cats.map(c => `<button class="chip ${c === activeCategory ? "active" : ""}" type="button" data-cat="${escapeHtml(c)}">${escapeHtml(c)}</button>`).join("")
+        : "";
+      chipsEl.querySelectorAll(".chip").forEach(b => {
+        b.addEventListener("click", () => { activeCategory = b.dataset.cat; renderDocs(); });
+      });
+
+      const q = (document.getElementById("docSearch").value || "").trim().toLowerCase();
+      const rows = docData.filter(d =>
+        (activeCategory === "전체" || docCategory(d) === activeCategory) &&
+        (!q || `${d.title || ""} ${d.content || ""} ${d.author || ""}`.toLowerCase().includes(q))
+      );
+
+      rows.sort((a, b) => {
+        if (docSort === "recent") return new Date(b.updated_at || 0) - new Date(a.updated_at || 0);
+        return docSortKey(a.title).localeCompare(docSortKey(b.title), "ko", { numeric: true });
+      });
+
+      if (!docData.length) {
+        listEl.innerHTML = `<div class="empty">아직 보관된 문서가 없어요. 위의 <b>＋ 새 문서</b>로 첫 문서를 등록해보세요!</div>`;
         return;
       }
-      list.innerHTML = data.map(m => `
-        <div class="memo-item">
-          <div class="memo-title">${escapeHtml(m.title)}</div>
-          <div class="memo-content">${linkify(m.content)}</div>
-          <div class="memo-foot">
-            <span>${escapeHtml(m.author)} · ${fmtDateTime(m.updated_at)}</span>
-            <button class="btn-ghost" onclick="deleteMemo(${m.id})">삭제</button>
+      if (!rows.length) {
+        listEl.innerHTML = `<div class="empty">조건에 맞는 문서가 없어요.</div>`;
+        return;
+      }
+
+      listEl.innerHTML = rows.map(d => `
+        <div class="doc-card" data-id="${d.id}">
+          <div class="doc-card-top">
+            <div class="doc-title">${escapeHtml(d.title || "(제목 없음)")}</div>
+            <span class="doc-chip">${escapeHtml(docCategory(d))}</span>
+          </div>
+          <div class="doc-preview">${escapeHtml(stripMd(d.content).slice(0, 170))}</div>
+          <div class="doc-foot">
+            <span>${escapeHtml(d.author || "작성자 미지정")}</span>
+            <span>${fmtDateTime(d.updated_at)}</span>
           </div>
         </div>
       `).join("");
+      listEl.querySelectorAll(".doc-card").forEach(card => {
+        card.addEventListener("click", () => openDoc(Number(card.dataset.id)));
+      });
     }
 
-    async function addMemo(e) {
+    function openDoc(id) {
+      const doc = docData.find(d => d.id === id);
+      if (!doc) return;
+      currentDocId = id;
+      editingDocId = null;
+      document.getElementById("viewerTitle").textContent = doc.title || "(제목 없음)";
+      document.getElementById("viewerMeta").textContent =
+        `${doc.author || "작성자 미지정"} · ${docCategory(doc)} · 최종 수정 ${fmtDateTime(doc.updated_at)}`;
+      document.getElementById("viewerMd").innerHTML = renderMarkdown(doc.content || "");
+      document.getElementById("copyBtn").textContent = "📋 본문 복사";
+      showViewerPane();
+      document.getElementById("docModal").classList.add("open");
+      document.getElementById("viewerBody").scrollTop = 0;
+    }
+
+    function showViewerPane() {
+      document.getElementById("viewerBody").style.display = "";
+      document.getElementById("viewerFoot").style.display = "flex";
+      document.getElementById("editorForm").classList.remove("open");
+      document.getElementById("editorFoot").style.display = "none";
+    }
+
+    function closeDocModal() {
+      document.getElementById("docModal").classList.remove("open");
+      currentDocId = null;
+      editingDocId = null;
+    }
+
+    function openDocEditor(id) {
+      editingDocId = id || null;
+      const doc = id ? docData.find(d => d.id === id) : null;
+      document.getElementById("editDocTitle").value = doc ? doc.title || "" : "";
+      document.getElementById("editDocAuthor").value = doc ? doc.author || "" : "피클";
+      document.getElementById("editDocContent").value = doc ? doc.content || "" : "";
+      document.getElementById("viewerTitle").textContent = doc ? "✏️ 문서 수정" : "📄 새 문서 작성";
+      document.getElementById("viewerMeta").textContent = doc
+        ? "저장하면 수정 시각이 갱신돼요."
+        : "마크다운(#·##·-·**·`)으로 작성할 수 있어요.";
+      document.getElementById("viewerBody").style.display = "none";
+      document.getElementById("viewerFoot").style.display = "none";
+      document.getElementById("editorForm").classList.add("open");
+      document.getElementById("editorFoot").style.display = "flex";
+      document.getElementById("docModal").classList.add("open");
+      document.getElementById("editDocTitle").focus();
+    }
+
+    function editCurrentDoc() {
+      if (currentDocId) openDocEditor(currentDocId);
+    }
+
+    function cancelEdit() {
+      if (editingDocId) {
+        const id = editingDocId;
+        editingDocId = null;
+        openDoc(id);
+      } else {
+        closeDocModal();
+      }
+    }
+
+    async function saveDoc(e) {
       e.preventDefault();
-      const titleEl = document.getElementById("memoTitle");
-      const contentEl = document.getElementById("memoContent");
-      const title = titleEl.value.trim();
-      const content = contentEl.value.trim();
-      if (!title) return;
-      titleEl.value = "";
-      contentEl.value = "";
-      await db.from("memos").insert([{ title, content, author: "동원" }]);
+      const title = document.getElementById("editDocTitle").value.trim();
+      const author = document.getElementById("editDocAuthor").value.trim();
+      const content = document.getElementById("editDocContent").value;
+      if (!title) { alert("문서 제목을 입력해 주세요."); return; }
+
+      const payload = { title, author: author || "피클", content, updated_at: new Date().toISOString() };
+
+      if (editingDocId) {
+        const targetId = editingDocId;
+        const { error } = await db.from("memos").update(payload).eq("id", targetId);
+        if (error) { alert("수정에 실패했어요: " + error.message); return; }
+        editingDocId = null;
+        await loadDocs();
+        openDoc(targetId);
+      } else {
+        const { data, error } = await db.from("memos").insert([payload]).select();
+        if (error) { alert("저장에 실패했어요: " + error.message); return; }
+        const newId = data && data[0] ? data[0].id : null;
+        await loadDocs();
+        if (newId && docData.some(d => d.id === newId)) {
+          activeCategory = "전체";
+          renderDocs();
+          openDoc(newId);
+        } else {
+          closeDocModal();
+        }
+      }
     }
 
-    async function deleteMemo(id) {
-      await db.from("memos").delete().eq("id", id);
+    async function deleteCurrentDoc() {
+      const doc = docData.find(d => d.id === currentDocId);
+      if (!doc) return;
+      if (!confirm(`「${doc.title || "(제목 없음)"}」 문서를 저장소에서 삭제할까요?`)) return;
+      const { error } = await db.from("memos").delete().eq("id", doc.id);
+      if (error) { alert("삭제에 실패했어요: " + error.message); return; }
+      closeDocModal();
+      await loadDocs();
     }
+
+    async function copyDocBody() {
+      const doc = docData.find(d => d.id === currentDocId);
+      if (!doc) return;
+      const text = doc.content || "";
+      let ok = false;
+      try {
+        if (navigator.clipboard && window.isSecureContext) {
+          await navigator.clipboard.writeText(text);
+          ok = true;
+        }
+      } catch (err) { ok = false; }
+      if (!ok) {
+        const ta = document.createElement("textarea");
+        ta.value = text;
+        ta.style.position = "fixed";
+        ta.style.opacity = "0";
+        document.body.appendChild(ta);
+        ta.focus();
+        ta.select();
+        try { ok = document.execCommand("copy"); } catch (err) { ok = false; }
+        document.body.removeChild(ta);
+      }
+      const btn = document.getElementById("copyBtn");
+      btn.textContent = ok ? "✅ 본문 복사됨" : "⚠️ 복사 실패";
+      setTimeout(() => { btn.textContent = "📋 본문 복사"; }, 1600);
+    }
+
+    function inlineMd(text) {
+      const store = [];
+      const keep = html => { store.push(html); return `\u0001${store.length - 1}\u0001`; };
+      let t = text;
+      t = t.replace(/`([^`]+)`/g, (_, c) => keep(`<code>${c}</code>`));
+      t = t.replace(/\[([^\]]+)\]\((https?:\/\/[^)\s]+)\)/g, (_, label, url) =>
+        keep(`<a href="${url}" target="_blank" rel="noopener">${label}</a>`));
+      t = t.replace(/(https?:\/\/[^\s<]+[^\s<.,)])/g, u =>
+        keep(`<a href="${u}" target="_blank" rel="noopener">${u}</a>`));
+      t = t.replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>");
+      t = t.replace(/(^|[\s(])\*([^*\n]+)\*/g, "$1<em>$2</em>");
+      return t.replace(/\u0001(\d+)\u0001/g, (_, i) => store[Number(i)]);
+    }
+
+    function renderMarkdown(src) {
+      const lines = escapeHtml(String(src || "")).split(/\r?\n/);
+      const out = [];
+      const para = [];
+      const flush = () => {
+        if (para.length) {
+          out.push(`<p>${para.map(inlineMd).join("<br>")}</p>`);
+          para.length = 0;
+        }
+      };
+
+      let i = 0;
+      while (i < lines.length) {
+        const line = lines[i];
+
+        if (/^\s*```/.test(line)) {
+          flush();
+          const buf = [];
+          i++;
+          while (i < lines.length && !/^\s*```/.test(lines[i])) { buf.push(lines[i]); i++; }
+          i++;
+          out.push(`<pre><code>${buf.join("\n")}</code></pre>`);
+          continue;
+        }
+
+        if (!line.trim()) { flush(); i++; continue; }
+
+        let m = /^(#{1,6})\s+(.*)$/.exec(line);
+        if (m) {
+          flush();
+          const lv = Math.min(m[1].length, 3);
+          out.push(`<h${lv}>${inlineMd(m[2].replace(/\s+#+\s*$/, ""))}</h${lv}>`);
+          i++;
+          continue;
+        }
+
+        if (/^\s*(-{3,}|\*{3,}|_{3,})\s*$/.test(line)) {
+          flush();
+          out.push("<hr>");
+          i++;
+          continue;
+        }
+
+        if (/^\s*>\s?/.test(line)) {
+          flush();
+          const buf = [];
+          while (i < lines.length && /^\s*>\s?/.test(lines[i])) {
+            buf.push(lines[i].replace(/^\s*>\s?/, ""));
+            i++;
+          }
+          out.push(`<blockquote>${buf.map(inlineMd).join("<br>")}</blockquote>`);
+          continue;
+        }
+
+        if (/^\s*[-*+]\s+/.test(line) || /^\s*\d+[.)]\s+/.test(line)) {
+          flush();
+          const ordered = /^\s*\d+[.)]\s+/.test(line);
+          const items = [];
+          while (i < lines.length && (/^\s*[-*+]\s+/.test(lines[i]) || /^\s*\d+[.)]\s+/.test(lines[i]))) {
+            let item = lines[i].replace(/^\s*(?:[-*+]|\d+[.)])\s+/, "");
+            i++;
+            while (i < lines.length && lines[i].trim() &&
+                   !/^\s*(?:[-*+]|\d+[.)])\s+/.test(lines[i]) &&
+                   !/^#{1,6}\s/.test(lines[i])) {
+              item += " " + lines[i].trim();
+              i++;
+            }
+            const box = /^\[( |x|X)\]\s+/.exec(item);
+            if (box) {
+              item = (box[1].toLowerCase() === "x" ? "☑ " : "☐ ") + inlineMd(item.slice(box[0].length));
+            } else {
+              item = inlineMd(item);
+            }
+            items.push(`<li>${item}</li>`);
+          }
+          out.push(ordered ? `<ol>${items.join("")}</ol>` : `<ul>${items.join("")}</ul>`);
+          continue;
+        }
+
+        para.push(line);
+        i++;
+      }
+      flush();
+      return out.join("\n");
+    }
+
+    document.addEventListener("keydown", ev => {
+      if (ev.key === "Escape") closeDocModal();
+    });
 
     function loadAll() {
       loadMessages();
       loadTasks();
       loadAgents();
-      loadMemos();
+      loadDocs();
     }
 
     // Realtime subscription
@@ -891,7 +1398,7 @@
       .on("postgres_changes", { event: "*", schema: "public", table: "messages" }, () => loadMessages())
       .on("postgres_changes", { event: "*", schema: "public", table: "tasks" }, () => loadTasks())
       .on("postgres_changes", { event: "*", schema: "public", table: "agents" }, () => loadAgents())
-      .on("postgres_changes", { event: "*", schema: "public", table: "memos" }, () => loadMemos())
+      .on("postgres_changes", { event: "*", schema: "public", table: "memos" }, () => loadDocs())
       .subscribe((status) => {
         const pill = document.getElementById("connPill");
         const text = document.getElementById("connText");
